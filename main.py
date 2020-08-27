@@ -14,7 +14,7 @@ config = None
 
 
 def get_protocol(proxy):
-    return str(proxy)[:str(proxy).index("//")]
+    return str(proxy)[:str(proxy).index("://")]
 
 
 def output_video(chat_id, videos):
