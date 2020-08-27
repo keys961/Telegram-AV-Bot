@@ -1,8 +1,9 @@
 import time
+import urllib.parse
 
 import telepot
 import yaml
-from av import AVSearcher
+from av import AVSearcher, URL_SEARCH
 from enum import Enum, unique
 from telepot.loop import MessageLoop
 from telepot.delegate import pave_event_space, per_chat_id, create_open
@@ -17,10 +18,28 @@ def get_protocol(proxy):
     return str(proxy)[:str(proxy).index("://")]
 
 
+def get_proxies_dict(proxy):
+    protocol = get_protocol(proxy)
+    ret = {}
+    if str(protocol).index("http") >= 0:
+        ret['http'] = proxy
+        ret['https'] = proxy
+    else:
+        ret[protocol] = proxy
+    return ret
+
+
 def output_video(chat_id, videos):
-    for video in videos:
-        bot.sendVideo(chat_id, video.get_embedded_url(), supports_streaming=True)
-        # bot.sendMessage(chat_id, video.get_url())
+    if len(videos) > 0:
+        msg = ""
+        cnt = 1
+        for video in videos:
+            # bot.sendVideo(chat_id, video.get_embedded_url())
+            msg = msg + str(cnt) + ". " + video.get_response()
+            cnt += 1
+        bot.sendMessage(chat_id, msg, parse_mode="HTML")
+    else:
+        bot.sendMessage(chat_id, "Nothing found.")
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Next", callback_data="N"), InlineKeyboardButton(text="Finish", callback_data="F")]
@@ -32,7 +51,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
         super(WinneAVSearcher, self).__init__(*args, True, **kwargs)
         if config['proxy'] is not None:
-            self.av_searcher = AVSearcher({get_protocol(config['proxy']): config['proxy']})
+            self.av_searcher = AVSearcher(get_proxies_dict(config['proxy']))
         else:
             self.av_searcher = AVSearcher()
         self.fetched_categories = self.av_searcher.fetch_categories()
@@ -132,7 +151,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
     def _do_search(self, msg, chat_id):
         self.state = AVSearcherState.SEARCH
         self.page = 0
-        self.param = msg
+        self.param = msg['text']
         videos = self.av_searcher.fetch(self.param, self.page)
         output_video(chat_id, videos)
 

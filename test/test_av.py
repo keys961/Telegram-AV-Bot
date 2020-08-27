@@ -2,7 +2,10 @@ import unittest
 import av
 from pprint import pprint
 
-PROXIES = {'http': 'http://127.0.0.1:8889'}
+PROXIES = {
+    'http': 'http://127.0.0.1:8889',
+    'https': 'http://127.0.0.1:8889'
+}
 
 
 class TestAV(unittest.TestCase):
