@@ -67,6 +67,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
                 _output_video(from_id, videos)
             elif callback_data == 'F':
                 self._reset_state()
+                bot.sendMessage(from_id, "Thank you sir ♂")
         elif self.state == AVSearcherState.CATEGORY_RECOMMEND:
             if callback_data == 'N':
                 self.page += 1
@@ -74,6 +75,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
                 _output_video(from_id, videos)
             elif callback_data == 'F':
                 self._reset_state()
+                bot.sendMessage(from_id, "Thank you sir ♂")
             else:
                 ch_id = self.fetched_categories[callback_data]
                 self.page = 0
