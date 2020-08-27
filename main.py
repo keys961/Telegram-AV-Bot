@@ -9,10 +9,19 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from ratelimit import limits, sleep_and_retry
 
+bot = telepot.DelegatorBot
+config = None
 
-def _output_video(chat_id, videos):
+
+def get_protocol(proxy):
+    return str(proxy)[:str(proxy).index("//")]
+
+
+def output_video(chat_id, videos):
     for video in videos:
-        bot.sendMessage(chat_id, video.get_url())
+        bot.sendVideo(chat_id, video.get_embedded_url(), supports_streaming=True)
+        # bot.sendMessage(chat_id, video.get_url())
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Next", callback_data="N"), InlineKeyboardButton(text="Finish", callback_data="F")]
     ])
@@ -22,7 +31,10 @@ def _output_video(chat_id, videos):
 class WinneAVSearcher(telepot.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
         super(WinneAVSearcher, self).__init__(*args, True, **kwargs)
-        self.av_searcher = AVSearcher({"http": config['proxy']})
+        if config['proxy'] is not None:
+            self.av_searcher = AVSearcher({get_protocol(config['proxy']): config['proxy']})
+        else:
+            self.av_searcher = AVSearcher()
         self.fetched_categories = self.av_searcher.fetch_categories()
         self.state = AVSearcherState.INIT
         self.page = 0
@@ -64,7 +76,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
             if callback_data == 'N':
                 self.page += 1
                 videos = self.av_searcher.fetch_recommendation(self.page)
-                _output_video(from_id, videos)
+                output_video(from_id, videos)
             elif callback_data == 'F':
                 self._reset_state()
                 bot.sendMessage(from_id, "Thank you sir ♂")
@@ -72,7 +84,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
             if callback_data == 'N':
                 self.page += 1
                 videos = self.av_searcher.fetch_category_recommendation(self.param, self.page)
-                _output_video(from_id, videos)
+                output_video(from_id, videos)
             elif callback_data == 'F':
                 self._reset_state()
                 bot.sendMessage(from_id, "Thank you sir ♂")
@@ -81,12 +93,12 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
                 self.page = 0
                 self.param = ch_id
                 videos = self.av_searcher.fetch_category_recommendation(self.param, self.page)
-                _output_video(from_id, videos)
+                output_video(from_id, videos)
         elif self.state == AVSearcherState.SEARCH:
             if callback_data == 'N':
                 self.page += 1
                 videos = self.av_searcher.fetch(self.param, self.page)
-                _output_video(from_id, videos)
+                output_video(from_id, videos)
             elif callback_data == 'F':
                 self._reset_state()
                 bot.sendMessage(from_id, "Thank you sir ♂")
@@ -96,7 +108,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
     def _handle_recommend(self, chat_id):
         self.state = AVSearcherState.RECOMMEND
         videos = self.av_searcher.fetch_recommendation()
-        _output_video(chat_id, videos)
+        output_video(chat_id, videos)
 
     def _handle_category_recommend(self, chat_id):
         self.state = AVSearcherState.CATEGORY_RECOMMEND
@@ -122,7 +134,7 @@ class WinneAVSearcher(telepot.helper.ChatHandler):
         self.page = 0
         self.param = msg
         videos = self.av_searcher.fetch(self.param, self.page)
-        _output_video(chat_id, videos)
+        output_video(chat_id, videos)
 
     def _reset_state(self):
         self.state = AVSearcherState.INIT
@@ -136,10 +148,6 @@ class AVSearcherState(Enum):
     RECOMMEND = 1,
     CATEGORY_RECOMMEND = 2,
     SEARCH = 3
-
-
-bot = None
-config = None
 
 
 def main():
