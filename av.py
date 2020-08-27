@@ -7,7 +7,7 @@ URL_RECOMMENDATION = 'https://api.avgle.com/v1/videos/{}?limit={}&o=tr&t=t'
 URL_CATEGORY_RECOMMENDATION = 'https://api.avgle.com/v1/videos/{}?c={}&limit={}&o=tr'
 URL_SEARCH = 'https://api.avgle.com/v1/search/{}/{}?limit={}&o=mv'
 RESPONSE_MODEL = '''
-<a href="{}">{}</a>\nlikes: {}, dislikes: {}, released at: {}\n
+{}\nlikes: {}, dislikes: {}, released at: {}\n{}\n
 '''
 REQUEST_HEADER = {
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:79.0) Gecko/20100101 Firefox/79.0",
@@ -74,7 +74,7 @@ class FetchedVideo:
     def get_response(self):
         time_local = time.localtime(self._add_time)
         dt = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
-        return RESPONSE_MODEL.format(self._embedded_url, self._title, self._like, self._dislike, dt)
+        return RESPONSE_MODEL.format(self._title, self._like, self._dislike, dt, self._url)
 
     def __repr__(self):
         return self._title

@@ -31,13 +31,12 @@ def get_proxies_dict(proxy):
 
 def output_video(chat_id, videos):
     if len(videos) > 0:
-        msg = ""
         cnt = 1
         for video in videos:
             # bot.sendVideo(chat_id, video.get_embedded_url())
-            msg = msg + str(cnt) + ". " + video.get_response()
+            msg = str(cnt) + ". " + video.get_response()
             cnt += 1
-        bot.sendMessage(chat_id, msg, parse_mode="HTML")
+            bot.sendMessage(chat_id, msg)
     else:
         bot.sendMessage(chat_id, "Nothing found.")
 
