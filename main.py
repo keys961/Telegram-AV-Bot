@@ -1,9 +1,8 @@
 import time
-import urllib.parse
 
 import telepot
 import yaml
-from av import AVSearcher, URL_SEARCH
+from avgle import AVSearcher
 from enum import Enum, unique
 from telepot.loop import MessageLoop
 from telepot.delegate import pave_event_space, per_chat_id, create_open
@@ -33,7 +32,6 @@ def output_video(chat_id, videos):
     if len(videos) > 0:
         cnt = 1
         for video in videos:
-            # bot.sendVideo(chat_id, video.get_embedded_url())
             msg = str(cnt) + ". " + video.get_response()
             cnt += 1
             bot.sendMessage(chat_id, msg)

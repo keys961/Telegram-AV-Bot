@@ -1,5 +1,5 @@
 import unittest
-import av
+import avgle
 from pprint import pprint
 
 PROXIES = {
@@ -11,7 +11,7 @@ PROXIES = {
 class TestAV(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestAV, self).__init__(*args, **kwargs)
-        self.av_searcher = av.AVSearcher(PROXIES)
+        self.av_searcher = avgle.AVSearcher(PROXIES)
 
     def test_category(self):
         pprint(self.av_searcher.fetch_categories())
